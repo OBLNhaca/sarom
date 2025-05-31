@@ -14,9 +14,16 @@ return new class extends Migration
         Schema::create('consultations', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('situation');
-            $table->timestamp('appointment_datetime');
+
+            $table->string('name', 200);
+            $table->string('email', 200);
+            $table->string('phone', 20);
+            $table->string('situation', 255);
+            $table->timestamp('appointment_datetime')->useCurrent()->useCurrentOnUpdate();
+            $table->string('doctor', 200);
+            $table->text('message')->nullable();
             $table->enum('status', ['scheduled', 'canceled', 'completed'])->default('scheduled');
+
             $table->timestamps();
         });
     }

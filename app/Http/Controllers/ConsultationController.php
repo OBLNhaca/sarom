@@ -2,33 +2,68 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NewUserWithConsultation;
 use App\Models\Consultation;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class ConsultationController extends Controller
 {
-    public function index() {
+    public function index()
+    {
         $consultations = Consultation::where('user_id', auth()->id())->get();
         return view('admin.consultations.index', compact('consultations'));
     }
 
-    public function store(Request $request) {
-        $request->validate([
-            'situation' => 'required',
+    public function markConsultation(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'phone' => 'required|string|max:20',
+            'situation' => 'required|string',
             'appointment_datetime' => 'required|date',
+            'doctor' => 'required|string',
+            'message' => 'nullable|string',
         ]);
 
-        Consultation::create([
-            'user_id' => auth()->id(),
-            'situation' => $request->situation,
-            'appointment_datetime' => $request->appointment_datetime,
+        // 2. Verificar se já há consulta para esse médico no mesmo horário
+        $alreadyTaken = Consultation::where('doctor', $validated['doctor'])
+            ->where('appointment_datetime', $validated['appointment_datetime'])
+            ->exists();
+
+        if ($alreadyTaken) {
+            return back()->withErrors(['appointment_datetime' => 'Este horário já está ocupado para o profissional selecionado.'])->withInput();
+        }
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['phone']),
+        ]);
+
+        $consultation = Consultation::create([
+            'user_id' => $user->id,
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'],
+            'situation' => $validated['situation'],
+            'appointment_datetime' => $validated['appointment_datetime'],
+            'doctor' => $validated['doctor'],
+            'message' => $validated['message'],
             'status' => 'scheduled',
         ]);
 
-        return redirect()->route('consultations.index');
-    }
+        Mail::to($user->email)->send(new NewUserWithConsultation($user, $consultation));
 
-    public function cancel(Consultation $consultation) {
+        return redirect()->route('login')->with('success', 'Consulta marcada com sucesso! Verifique o seu email para obter os dados de acesso à conta, o link de entrada e as instruções da consulta.');
+    }
+    public function store(Request $request) {}
+
+    public function cancel(Consultation $consultation)
+    {
         $this->authorize('cancel', $consultation);
         $consultation->update(['status' => 'canceled']);
         return back();

@@ -34,7 +34,12 @@
                                     <div class="text-center">
                                         <h1 class="h4 text-gray-900 mb-4">Bem vindo de volta</h1>
                                     </div>
-
+                                    
+                                    @if (session('success'))
+                                    <div class="alert alert-success small text-center">
+                                        {{ session('success') }}
+                                    </div>
+                                    @endif
                                     <!-- Laravel Login Form -->
                                     <form method="POST" action="{{ route('login') }}" class="user">
                                         @csrf

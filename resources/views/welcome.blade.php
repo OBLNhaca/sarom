@@ -199,49 +199,78 @@
 
             <div class="container" data-aos="fade-up" data-aos-delay="100">
 
-                <form action="forms/appointment.php" method="post" role="form" class="php-email-form">
+                <form action="{{ route('consultations.store') }}" method="POST" role="form" class="php-email-form">
+                    @csrf
+
                     <div class="row">
                         <div class="col-md-4 form-group">
-                            <input type="text" name="name" class="form-control" id="name" placeholder="O seu nome" required>
+                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
+                                placeholder="O seu nome" value="{{ old('name') }}" required>
+                            @error('name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="col-md-4 form-group mt-3 mt-md-0">
-                            <input type="email" class="form-control" name="email" id="email" placeholder="O seu email" required>
+                            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
+                                placeholder="O seu email" value="{{ old('email') }}" required>
+                            @error('email')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="col-md-4 form-group mt-3 mt-md-0">
-                            <input type="tel" class="form-control" name="phone" id="phone" placeholder="O seu contacto telefónico" required>
+                            <input type="tel" name="phone" class="form-control @error('phone') is-invalid @enderror"
+                                placeholder="O seu contacto telefónico" value="{{ old('phone') }}" required>
+                            @error('phone')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
+
                     <div class="row">
                         <div class="col-md-4 form-group mt-3">
-                            <input type="datetime-local" name="date" class="form-control datepicker" id="date" placeholder="Data da marcação" required>
+                            <input type="datetime-local" name="appointment_datetime"
+                                class="form-control @error('appointment_datetime') is-invalid @enderror"
+                                value="{{ old('appointment_datetime') }}" required>
+                            @error('appointment_datetime')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="col-md-4 form-group mt-3">
-                            <select name="department" id="department" class="form-select" required>
+                            <select name="situation" class="form-select @error('situation') is-invalid @enderror" required>
                                 <option value="">Selecione o serviço</option>
-                                <option value="Nutrição">Nutrição</option>
-                                <option value="Consulta">Consulta</option>
+                                <option value="Nutrição" {{ old('situation') == 'Nutrição' ? 'selected' : '' }}>Nutrição</option>
+                                <option value="Consulta" {{ old('situation') == 'Consulta' ? 'selected' : '' }}>Consulta</option>
                             </select>
+                            @error('situation')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="col-md-4 form-group mt-3">
-                            <select name="doctor" id="doctor" class="form-select" required>
+                            <select name="doctor" class="form-select @error('doctor') is-invalid @enderror" required>
                                 <option value="">Selecione o profissional</option>
-                                <option value="Profissional 1">Profissional 1</option>
-                                <option value="Profissional 2">Profissional 2</option>
-                                <option value="Profissional 3">Profissional 3</option>
+                                @foreach($staffList as $staff)
+                                <option value="{{ $staff->user->name }}" {{ old('doctor') == $staff->user->name  ? 'selected' : '' }}>{{ $staff->user->name }}</option>
+                                @endforeach
                             </select>
+                            @error('doctor')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
 
                     <div class="form-group mt-3">
-                        <textarea class="form-control" name="message" rows="5" placeholder="Mensagem (opcional)"></textarea>
+                        <textarea name="message" rows="5" class="form-control @error('message') is-invalid @enderror"
+                            placeholder="Mensagem (opcional)">{{ old('message') }}</textarea>
+                        @error('message')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
-                    <div class="mt-3">
-                        <div class="loading">A carregar...</div>
-                        <div class="error-message"></div>
-                        <div class="sent-message">O seu pedido de marcação foi enviado com sucesso. Obrigado!</div>
-                        <div class="text-center"><button type="submit">Efetuar Marcação</button></div>
+
+                    <div class="text-center mt-4">
+                        <button type="submit">Efetuar Marcação</button>
                     </div>
                 </form>
+
 
             </div>
 
@@ -339,61 +368,61 @@
 
     <footer id="footer" class="footer light-background">
 
-    <div class="container footer-top">
-        <div class="row gy-4">
-            <div class="col-lg-4 col-md-6 footer-about">
-                <a href="index.html" class="logo d-flex align-items-center">
-                    <span class="sitename">Medilab</span>
-                </a>
-                <div class="footer-contact pt-3">
-                    <p>Av. Julius Nyerere</p>
-                    <p>Maputo, Moçambique</p>
-                    <p class="mt-3"><strong>Telefone:</strong> <span>+258 21 123 4567</span></p>
-                    <p><strong>Email:</strong> <span>info@sarom.co.mz</span></p>
+        <div class="container footer-top">
+            <div class="row gy-4">
+                <div class="col-lg-4 col-md-6 footer-about">
+                    <a href="index.html" class="logo d-flex align-items-center">
+                        <span class="sitename">Medilab</span>
+                    </a>
+                    <div class="footer-contact pt-3">
+                        <p>Av. Julius Nyerere</p>
+                        <p>Maputo, Moçambique</p>
+                        <p class="mt-3"><strong>Telefone:</strong> <span>+258 21 123 4567</span></p>
+                        <p><strong>Email:</strong> <span>info@sarom.co.mz</span></p>
+                    </div>
+                    <div class="social-links d-flex mt-4">
+                        <a href="#"><i class="bi bi-twitter"></i></a>
+                        <a href="#"><i class="bi bi-facebook"></i></a>
+                        <a href="#"><i class="bi bi-instagram"></i></a>
+                        <a href="#"><i class="bi bi-linkedin"></i></a>
+                    </div>
                 </div>
-                <div class="social-links d-flex mt-4">
-                    <a href="#"><i class="bi bi-twitter"></i></a>
-                    <a href="#"><i class="bi bi-facebook"></i></a>
-                    <a href="#"><i class="bi bi-instagram"></i></a>
-                    <a href="#"><i class="bi bi-linkedin"></i></a>
+
+                <div class="col-lg-2 col-md-3 footer-links">
+                    <h4>Links</h4>
+                    <ul>
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#">Serviços</a></li>
+                        <li><a href="#">Marcar Consulta</a></li>
+                    </ul>
                 </div>
-            </div>
 
-            <div class="col-lg-2 col-md-3 footer-links">
-                <h4>Links</h4>
-                <ul>
-                    <li><a href="#">Home</a></li>
-                    <li><a href="#">Serviços</a></li>
-                    <li><a href="#">Marcar Consulta</a></li>
-                </ul>
-            </div>
+                <div class="col-lg-2 col-md-3 footer-links">
+                    <h4>Serviços</h4>
+                    <ul>
+                        <li><a href="#">Nutrição</a></li>
+                        <li><a href="#">Consultas</a></li>
+                    </ul>
+                </div>
 
-            <div class="col-lg-2 col-md-3 footer-links">
-                <h4>Serviços</h4>
-                <ul>
-                    <li><a href="#">Nutrição</a></li>
-                    <li><a href="#">Consultas</a></li>
-                </ul>
-            </div>
+                <!-- Pode remover as outras colunas ou deixar vazias se preferir -->
+                <div class="col-lg-2 col-md-3 footer-links">
+                    <h4>&nbsp;</h4>
+                    <ul></ul>
+                </div>
 
-            <!-- Pode remover as outras colunas ou deixar vazias se preferir -->
-            <div class="col-lg-2 col-md-3 footer-links">
-                <h4>&nbsp;</h4>
-                <ul></ul>
-            </div>
-
-            <div class="col-lg-2 col-md-3 footer-links">
-                <h4>&nbsp;</h4>
-                <ul></ul>
+                <div class="col-lg-2 col-md-3 footer-links">
+                    <h4>&nbsp;</h4>
+                    <ul></ul>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="container copyright text-center mt-4">
-        <p>© <span>Copyright</span> <strong class="px-1 sitename">Sarom</strong> <span>Todos os direitos reservados</span></p>
-    </div>
+        <div class="container copyright text-center mt-4">
+            <p>© <span>Copyright</span> <strong class="px-1 sitename">Sarom</strong> <span>Todos os direitos reservados</span></p>
+        </div>
 
-</footer>
+    </footer>
 
 
     <!-- Scroll Top -->
@@ -404,7 +433,7 @@
 
     <!-- Vendor JS Files -->
     <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('assets/vendor/php-email-form/validate.js') }}"></script>
+    <!-- <script src="{{ asset('assets/vendor/php-email-form/validate.js') }}"></script> -->
     <script src="{{ asset('assets/vendor/aos/aos.js') }}"></script>
     <script src="{{ asset('assets/vendor/glightbox/js/glightbox.min.js') }}"></script>
     <script src="{{ asset('assets/vendor/purecounter/purecounter_vanilla.js') }}"></script>
