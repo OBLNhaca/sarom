@@ -5,9 +5,9 @@
 <!-- Page Heading -->
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">Consultas</h1>
-    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+    {{-- <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
         <i class="fas fa-download fa-sm text-white-50"></i> Gerar Relatório
-    </a>
+    </a> --}}
 </div>
 
 <!-- Content Row -->
@@ -36,29 +36,62 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @forelse ($consultations as $index => $consultation)
                             <tr>
-                                <td>1</td>
-                                <td>José Chissano</td>
-                                <td>Dra. Helena Matola</td>
-                                <td>30/05/2025</td>
-                                <td>Agendada</td>
+                                <td>{{ $index + 1 }}</td>
+                                <td>{{ $consultation->name }}</td>
+                                <td>{{ $consultation->doctor }}</td>
+                                <td>{{ \Carbon\Carbon::parse($consultation->appointment_datetime)->format('d/m/Y H:i') }}</td>
                                 <td>
-                                    <a href="#" class="btn btn-info btn-sm" title="Ver">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="#" class="btn btn-warning btn-sm" title="Editar">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <button class="btn btn-danger btn-sm" title="Excluir" onclick="confirm('Deseja excluir esta consulta?')">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                    @if ($consultation->status === 'scheduled')
+                                    <span class="badge badge-primary">Agendada</span>
+                                    @elseif ($consultation->status === 'canceled')
+                                    <span class="badge badge-danger">Cancelada</span>
+                                    @elseif ($consultation->status === 'completed')
+                                    <span class="badge badge-success">Concluída</span>
+                                    @else
+                                    <span>{{ $consultation->status }}</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <!-- Confirmar Consulta -->
+                                    <form action="{{ route('consultations.confirm', $consultation) }}" method="POST" class="d-inline" onsubmit="return confirm('Deseja confirmar esta consulta?');">
+                                        @csrf
+                                        @method('PUT')
+                                        <button class="btn btn-info btn-sm" title="Confirmar" type="submit">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+
+                                    <!-- Cancelar Consulta -->
+                                    <form action="{{ route('consultations.cancel', $consultation) }}" method="POST" class="d-inline" onsubmit="return confirm('Deseja cancelar esta consulta?');">
+                                        @csrf
+                                        @method('PUT')
+                                        <button class="btn btn-warning btn-sm" title="Cancelar" type="submit">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
+
+                                    <!-- Excluir Consulta -->
+                                    <form action="{{ route('consultas.destroy', $consultation->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Deseja excluir esta consulta?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-danger btn-sm" title="Excluir" type="submit">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
-                            <!-- Outros dados aqui -->
+                            @empty
+                            <tr>
+                                <td colspan="6" class="text-center">Nenhuma consulta encontrada.</td>
+                            </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
             </div>
+
         </div>
 
     </div>

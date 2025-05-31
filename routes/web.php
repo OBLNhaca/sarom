@@ -34,7 +34,8 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('/funcionarios', StaffController::class);
     Route::resource('consultas', ConsultationController::class);
-    Route::get('consultations/{consultation}/cancel', [ConsultationController::class, 'cancel'])->name('consultations.cancel');
+    Route::put('consultations/{consultation}/cancel', [ConsultationController::class, 'cancel'])->name('consultations.cancel');
+    Route::put('consultations/{consultation}/confirm', [ConsultationController::class, 'confirm'])->name('consultations.confirm');
     Route::get('reminders/generate', [ReminderController::class, 'generate'])->name('reminders.generate');
 
     Route::resource('/utilizadores', UserController::class);

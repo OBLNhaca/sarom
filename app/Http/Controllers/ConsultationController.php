@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\NewUserWithConsultation;
 use App\Models\Consultation;
+use App\Models\Staff;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -13,8 +14,22 @@ class ConsultationController extends Controller
 {
     public function index()
     {
-        $consultations = Consultation::where('user_id', auth()->id())->get();
+        $user = auth()->user();
+
+        if ($user->role === 'cliente') {
+            $consultations = Consultation::where('user_id', $user->id)->get();
+        } else {
+            $consultations = Consultation::all();
+        }
+
         return view('admin.consultations.index', compact('consultations'));
+    }
+
+
+    public function create()
+    {
+        $staffList = Staff::with('user')->get();
+        return view('admin.consultations.create', compact('staffList'));
     }
 
     public function markConsultation(Request $request)
@@ -60,7 +75,15 @@ class ConsultationController extends Controller
 
         return redirect()->route('login')->with('success', 'Consulta marcada com sucesso! Verifique o seu email para obter os dados de acesso à conta, o link de entrada e as instruções da consulta.');
     }
-    public function store(Request $request) {}
+    public function confirm(Consultation $consultation)
+    {
+        // $this->authorize('confirm', $consultation);
+
+        $consultation->update(['status' => 'confirmed']);
+
+        return back()->with('success', 'Consulta confirmada com sucesso.');
+    }
+
 
     public function cancel(Consultation $consultation)
     {
